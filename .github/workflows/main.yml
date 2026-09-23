@@ -1,0 +1,45 @@
+name: Multi-Container CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build React test image
+        run: docker build -t complex-client-test -f ./client/Dockerfile.dev ./client
+
+      - name: Run React tests
+        run: docker run -e CI=true complex-client-test npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build client production image
+        run: docker build -t datorres335/multi-client ./client
+
+      - name: Build NGINX production image
+        run: docker build -t datorres335/multi-nginx ./nginx
+
+      - name: Build server production image
+        run: docker build -t datorres335/multi-server ./server
+
+      - name: Build worker production image
+        run: docker build -t datorres335/multi-worker ./worker
