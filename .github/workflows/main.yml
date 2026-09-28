@@ -93,5 +93,5 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         run: |
           aws elasticbeanstalk update-environment \
-            --environment-name "MultiDocker-env" \
+            --environment-name "Multi-docker-env" \
             --version-label "${{ github.sha }}"
